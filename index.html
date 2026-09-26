@@ -228,12 +228,94 @@ nav{display:flex;gap:6px 8px;justify-content:center;flex-wrap:wrap;padding:8px 1
 @media (orientation: landscape) and (max-height: 500px) and (pointer: coarse){
   .rotate{display:flex}
 }
+/* ---------- holiday theme ---------- */
+#snow{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;display:none}
+body.holiday #snow{display:block}
+header,main,nav{position:relative;z-index:1}
+body.holiday{
+  --bg:#0d1828; --ink:#eef3f8; --muted:#a8b8ca; --btn:#1a2a40; --accent:#d9ae44;
+  --glass:rgba(220,235,255,.07); --glass-edge:rgba(210,228,248,.42); --hid:#8b1e2b; --hi:.3;
+  background:radial-gradient(ellipse 120% 70% at 50% 0%, #1c3355 0%, #0d1828 60%, #080f1a 100%) fixed;
+}
+body.holiday #next, body.holiday #startBtn{color:#1a1206}
+body.holiday .ball{
+  width:calc(var(--b) * .84);height:calc(var(--b) * .84);margin-top:calc(var(--b) * .16);position:relative;
+  --pat:linear-gradient(transparent,transparent);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255,255,255,.95) 0 5%, rgba(255,255,255,.4) 11%, rgba(255,255,255,0) 24%),
+    var(--pat),
+    radial-gradient(circle at 62% 86%, rgba(255,255,255,.25) 0, rgba(255,255,255,0) 30%),
+    radial-gradient(circle at 40% 35%, var(--lt) 0, var(--c) 40%, var(--dk) 100%);
+}
+/* the flying ornament floats above the page; it must never take up room in the layout */
+body.holiday .ball.fly{position:fixed;margin:0}
+body.holiday .ball::before{ /* gold cap */
+  content:'';position:absolute;left:50%;top:calc(var(--b) * -.1);width:30%;height:calc(var(--b) * .12);
+  transform:translateX(-50%);border-radius:2px 2px 1px 1px;
+  background:linear-gradient(90deg,#7d5f18,#f4d67f 40%,#b88f2c 72%,#6b5114);box-shadow:0 1px 1px rgba(0,0,0,.35);
+}
+body.holiday .ball::after{ /* hanging loop */
+  content:'';position:absolute;left:50%;top:calc(var(--b) * -.17);width:14%;height:calc(var(--b) * .09);
+  transform:translateX(-50%);border:1.5px solid #e6c463;border-bottom:0;border-radius:50% 50% 0 0;
+}
+/* a different pattern on each color, which also helps tell them apart */
+body.holiday .ball.c0{--pat:linear-gradient(180deg,transparent 43%,rgba(246,212,120,.9) 43% 57%,transparent 57%)}
+body.holiday .ball.c1{--pat:repeating-linear-gradient(45deg,rgba(255,255,255,.3) 0 12%,transparent 12% 24%)}
+body.holiday .ball.c2{--pat:radial-gradient(circle,rgba(255,255,255,.6) 0 11%,transparent 13%) 0 0/34% 34%}
+body.holiday .ball.c3{--pat:repeating-linear-gradient(90deg,rgba(255,255,255,.26) 0 10%,transparent 10% 25%)}
+body.holiday .ball.c4{--pat:linear-gradient(180deg,transparent 28%,rgba(255,255,255,.6) 28% 34%,transparent 34% 66%,rgba(255,255,255,.6) 66% 72%,transparent 72%)}
+body.holiday .ball.c5{--pat:radial-gradient(circle,rgba(255,255,255,.75) 0 7%,transparent 9%) 0 0/25% 25%}
+body.holiday .ball.c6{--pat:radial-gradient(circle,rgba(246,212,120,.85) 0 10%,transparent 12%) 0 0/33% 33%}
+body.holiday .ball.c7{--pat:repeating-linear-gradient(-45deg,rgba(246,212,120,.45) 0 9%,transparent 9% 22%)}
+body.holiday .ball.c8{--pat:repeating-conic-gradient(from 0deg at 50% 50%,rgba(255,255,255,.28) 0 15deg,transparent 15deg 30deg)}
+body.holiday .ball.c9{--pat:repeating-linear-gradient(180deg,rgba(246,212,120,.55) 0 6%,transparent 6% 19%)}
+body.holiday .ball.c10{--pat:radial-gradient(circle,rgba(255,255,255,.85) 0 5%,transparent 7%) 0 0/19% 19%}
+body.holiday .ball.c11{--pat:repeating-linear-gradient(135deg,rgba(214,40,52,.75) 0 10%,transparent 10% 22%)}
+/* hidden balls become wrapped presents */
+body.holiday .ball.hidden{
+  border-radius:14%;
+  background:
+    linear-gradient(90deg,transparent 42%,#e8c35e 42% 58%,transparent 58%),
+    linear-gradient(180deg,transparent 42%,#e8c35e 42% 58%,transparent 58%),
+    linear-gradient(135deg,#b3202e,#7a1420);
+  box-shadow:0 3px 4px -1px rgba(0,0,0,.45), inset 0 -2px 3px rgba(0,0,0,.25);
+}
+body.holiday .ball.hidden::before{
+  top:calc(var(--b) * -.08);width:44%;height:calc(var(--b) * .14);border-radius:50% 50% 40% 40%;
+  background:radial-gradient(circle at 30% 50%,#f4d67f 0 30%,transparent 32%),radial-gradient(circle at 70% 50%,#f4d67f 0 30%,transparent 32%),radial-gradient(circle,#c99a2e 0 22%,transparent 24%);
+  box-shadow:none;
+}
+body.holiday .ball.hidden::after{display:none}
+body.holiday .ball.hidden .q{display:none}
+body.holiday .bow{
+  position:absolute;left:-18%;right:-18%;top:calc(var(--b) * -.72);z-index:4;
+  animation:cork .45s cubic-bezier(.3,1.4,.5,1);filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));
+}
+body.holiday .bow svg{display:block;width:100%;height:auto}
+body.holiday .tube.done{border-color:var(--accent)}
+body.holiday nav{
+  background:linear-gradient(180deg, rgba(8,15,26,0) 0, #080f1a 16px);
+  margin-bottom:calc(env(safe-area-inset-bottom, 0px) * -1);
+  padding-bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  max-width:none;
+}
+body.holiday .ctl:disabled{opacity:1;color:#5d6d80;border-color:rgba(210,228,248,.18);background:#131f30}
 @media (prefers-reduced-motion: reduce){
+  body.holiday #snow{display:none}
+
   .ball,.ball.land,.ball.reveal,.cork,.slot.shake .tube,.toast{transition:none;animation:none}
 }
 </style>
 </head>
 <body>
+<canvas id="snow" aria-hidden="true"></canvas>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="bowGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8e08e"/><stop offset=".55" stop-color="#d6a93a"/><stop offset="1" stop-color="#96701e"/>
+    </linearGradient>
+  </defs>
+</svg>
 <header>
   <h1>Tube Sort</h1>
   <div class="stats"><button id="who" aria-label="Switch player">👤</button><span id="lvl">Level 1</span><span id="moves">0 moves</span></div>
@@ -277,6 +359,7 @@ nav{display:flex;gap:6px 8px;justify-content:center;flex-wrap:wrap;padding:8px 1
     <label class="switch">Sound effects <input type="checkbox" id="optSounds" role="switch"></label>
     <label class="switch">Vibration <input type="checkbox" id="optVibe" role="switch"></label>
     <label class="switch">Symbols on balls <input type="checkbox" id="optSymbols" role="switch"></label>
+    <label class="switch">Holiday theme <input type="checkbox" id="optHoliday" role="switch"></label>
     <button class="ctl" id="setWho">Switch player</button>
     <button class="ctl" id="setClose" style="background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:600">Done</button>
   </div>
@@ -633,7 +716,82 @@ function composeSuite(){
     ...sec(0.45, false, A, B, A2), ...sec(0.3, false, C), ...sec(0.25, true, D2), ...sec(0, false, pause)
   ];
 }
-// Pick a chord for each 3-beat bar of a phrase from the melody notes in it:
+// ---- holiday medley: secular, public-domain tunes arranged for whistle and harp ----
+// [midi, beats]; midi 0 is a rest. Each entry also carries its own tempo and meter.
+function composeHoliday(){
+  // Carol of the Bells (Leontovych's "Shchedryk", 1916), E minor, 3/4
+  const bar4 = b => [...b, ...b, ...b, ...b];
+  const CB_A = bar4([[67,1],[66,.5],[67,.5],[64,1]]);
+  const CB_B = bar4([[71,1],[69,.5],[71,.5],[67,1]]);
+  const CB_C = [[76,.5],[76,.5],[74,.5],[72,.5],[71,.5],[69,.5], [71,.5],[71,.5],[69,.5],[67,.5],[66,.5],[64,.5],
+                [76,.5],[76,.5],[74,.5],[72,.5],[71,.5],[69,.5], [71,.5],[71,.5],[69,.5],[67,.5],[66,.5],[64,.5]];
+  const CB = [...CB_A, ...CB_B, ...CB_A, ...CB_C, ...CB_A];
+  // Jingle Bells (1857), G major, 4/4
+  const JV1 = [[62,1],[71,1],[69,1],[67,1],[62,3],[62,.5],[62,.5],[62,1],[71,1],[69,1],[67,1],[64,4],
+               [64,1],[72,1],[71,1],[69,1],[66,4],[74,1],[74,1],[72,1],[69,1],[71,4]];
+  const JV2 = [[62,1],[71,1],[69,1],[67,1],[62,4],[62,1],[71,1],[69,1],[67,1],[64,3],[64,1],
+               [64,1],[72,1],[71,1],[69,1],[74,1],[74,1],[74,1],[74,1],[76,1],[74,1],[72,1],[69,1],[67,2],[62,2]];
+  const JC1 = [[71,1],[71,1],[71,2],[71,1],[71,1],[71,2],[71,1],[74,1],[67,1.5],[69,.5],[71,4],
+               [72,1],[72,1],[72,1.5],[72,.5],[72,1],[71,1],[71,1],[71,.5],[71,.5],[71,1],[69,1],[69,1],[71,1],[69,2],[74,2]];
+  const JC2 = [...JC1.slice(0, 20), [74,1],[74,1],[72,1],[69,1],[67,4]];
+  // Deck the Halls (Welsh traditional), G major, 4/4
+  const DK1 = [[74,1.5],[72,.5],[71,1],[69,1],[67,1],[69,1],[71,1],[67,1],[69,.5],[71,.5],[72,.5],[69,.5],[71,1.5],[69,.5],[67,1],[66,1],[67,2]];
+  const DK3 = [[69,1.5],[71,.5],[72,1],[69,1],[71,1.5],[72,.5],[74,1],[69,1],[71,.5],[73,.5],[74,1],[76,.5],[78,.5],[79,1],[78,1],[76,1],[74,2]];
+  const DK4 = [[74,1.5],[72,.5],[71,1],[69,1],[67,1],[69,1],[71,1],[67,1],[76,.5],[76,.5],[76,.5],[76,.5],[74,1.5],[72,.5],[71,1],[69,1],[67,2]];
+  const DECK = [...DK1, ...DK1, ...DK3, ...DK4];
+  // We Wish You a Merry Christmas (English traditional), G major, 3/4, with its pickup
+  const WW = [[0,2],[62,1],[67,1],[67,.5],[69,.5],[67,.5],[66,.5],[64,1],[64,1],[64,1],[69,1],[69,.5],[71,.5],[69,.5],[67,.5],
+              [66,1],[62,1],[62,1],[71,1],[71,.5],[72,.5],[71,.5],[69,.5],[67,1],[64,1],[62,.5],[62,.5],[64,1],[69,1],[66,1],[67,3]];
+  // Auld Lang Syne (Scottish traditional), G major, 4/4
+  const ALV = [[0,3],[62,1],[67,1.5],[67,.5],[67,1],[71,1],[69,1.5],[67,.5],[69,1],[71,.5],[69,.5],[67,1.5],[67,.5],[71,1],[74,1],
+               [76,3],[76,1],[74,1.5],[71,.5],[71,1],[67,1],[69,1.5],[67,.5],[69,1],[71,.5],[69,.5],[67,1.5],[64,.5],[64,1],[62,1],[67,3],[0,1]];
+  const ALC = [[0,3],[76,1],[74,1.5],[71,.5],[71,1],[67,1],[69,1.5],[67,.5],[69,1],[76,1],[74,1.5],[71,.5],[71,1],[74,1],
+               [76,3],[76,1],[74,1.5],[71,.5],[71,1],[67,1],[69,1.5],[67,.5],[69,1],[71,.5],[69,.5],[67,1.5],[64,.5],[64,1],[62,1],[67,4]];
+  // Two quiet winter interludes built on your original tunes
+  const OA = [[74,2],[71,1],[69,1.5],[67,.5],[69,1],[71,2],[74,1],[76,3]];
+  const OB = [[79,1.5],[76,.5],[74,1],[76,1],[74,1],[71,1],[69,2],[67,1],[69,3]];
+  const OC = [[71,2],[72,1],[74,1.5],[76,.5],[74,1],[71,1],[69,1],[67,1],[66,1],[67,2]];
+  const OD = [[64,1],[67,1],[69,1],[71,3],[69,1.5],[67,4.5]];
+  const I1 = [[67,1],[69,1],[71,1],[74,2],[72,1],[71,2],[69,1],[67,3]];
+  const I2 = [[69,1],[71,1],[72,1],[76,2],[74,1],[72,1.5],[71,.5],[69,1],[71,3]];
+  const I3 = [[67,1],[69,1],[71,1],[74,2],[76,1],[74,1.5],[72,.5],[71,1],[69,3]];
+  const I4 = [[71,2],[69,1],[67,1.5],[66,.5],[64,1],[66,2],[69,1],[67,3]];
+
+  const r = rng(1225);
+  const SC = [62,64,66,67,69,71,72,74,76,78,79,81];
+  const near = m => SC.reduce((bi, x, i) => Math.abs(x - m) < Math.abs(SC[bi] - m) ? i : bi, 0);
+  const ornament = (ph, amount) => ph.flatMap(([m, d], i) =>
+    m > 0 && i < ph.length - 1 && d >= 2 && r() < amount
+      ? [[m, d - 0.5], [SC[Math.min(SC.length - 1, near(m) + 1)], 0.25], [m, 0.25]]
+      : [[m, d]]);
+  const cat = (...parts) => parts.flat();
+  const item = (o, notes) => ({ notes, rest: 0, harp: o.harp, sparse: !!o.sparse, bpm: o.bpm, meter: o.meter, bells: !!o.bells });
+  const rest = (o, beats) => ({ notes: null, rest: beats, harp: 0, bpm: o.bpm, meter: o.meter });
+  const T = {
+    bells:   { bpm: 138, meter: 3, harp: 0.4 },
+    jingle:  { bpm: 116, meter: 4, harp: 0.45, bells: true },
+    winter:  { bpm: 62,  meter: 3, harp: 0.35, sparse: true },
+    winter2: { bpm: 64,  meter: 3, harp: 0.4 },
+    deck:    { bpm: 104, meter: 4, harp: 0.45 },
+    wish:    { bpm: 126, meter: 3, harp: 0.45, bells: true },
+    auld:    { bpm: 72,  meter: 4, harp: 0.4 },
+    auldEnd: { bpm: 66,  meter: 4, harp: 0.3, sparse: true }
+  };
+  return [
+    item(T.bells, CB), rest(T.bells, 3),
+    item(T.jingle, cat(JV1, JV2)), item(T.jingle, cat(JC1, JC2)), item(T.jingle, cat(ornament(JC1, 0.5), ornament(JC2, 0.5))), rest(T.jingle, 4),
+    item(T.winter, cat(OA, OB, OA, OC, OD)), rest(T.winter, 3),
+    item(T.deck, DECK), item(T.deck, ornament(DECK, 0.5)), rest(T.deck, 4),
+    item(T.wish, WW), item(T.wish, WW), item(T.wish, ornament(WW, 0.6)), item(T.wish, WW), rest(T.wish, 3),
+    item(T.winter2, cat(I1, I2, I3, I4)), rest(T.winter2, 3),
+    item(T.bells, CB), rest(T.bells, 3),
+    item(T.jingle, cat(ornament(JV1, 0.4), JV2)), item(T.jingle, cat(JC1, JC2)), rest(T.jingle, 4),
+    item(T.deck, ornament(DECK, 0.3)), rest(T.deck, 4),
+    item(T.auld, ALV), item(T.auld, ALC), item(T.auldEnd, ornament(ALV, 0.4)), rest(T.auldEnd, 8)
+  ];
+}
+
+// Pick a chord for each bar of a phrase from the melody notes in it:
 // the chord that holds the most melody time wins, with a bonus for the note on
 // the downbeat and a slight preference for the home chords.
 const CHORDS = {
@@ -643,17 +801,17 @@ const CHORDS = {
   Em: { pcs: [4, 7, 11], root: 52, prior: 0.25 },
   Am: { pcs: [9, 0, 4],  root: 45, prior: 0.12 }
 };
-function chordsFor(notes){
+function chordsFor(notes, meter = 3){
   const beats = notes.reduce((a, n) => a + n[1], 0);
-  const bars = Math.round(beats / 3);
+  const bars = Math.round(beats / meter);
   const out = [];
   for (let b = 0; b < bars; b++){
-    const lo = b * 3, hi = lo + 3;
+    const lo = b * meter, hi = lo + meter;
     let best = 'G', bestScore = -1, t = 0;
     const inBar = [];
     notes.forEach(([m, d]) => {
       const s0 = Math.max(t, lo), s1 = Math.min(t + d, hi);
-      if (s1 > s0) inBar.push({ pc: m % 12, len: s1 - s0, down: t <= lo && t + d > lo });
+      if (s1 > s0 && m > 0) inBar.push({ pc: m % 12, len: s1 - s0, down: t <= lo && t + d > lo });
       t += d;
     });
     for (const [name, c] of Object.entries(CHORDS)){
@@ -711,10 +869,10 @@ const Music = (() => {
     return wave;
   }
 
-  function whistlePhrase(out, t0, notes){
+  function whistlePhrase(out, t0, notes, bd = BEAT){
     const times = [];
     let t = t0;
-    notes.forEach(([m, b]) => { times.push(t); t += b * BEAT; });
+    notes.forEach(([m, b]) => { times.push(t); t += b * bd; });
     const tEnd = t, n = notes.length;
 
     const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 6500; tone.Q.value = 0.5;
@@ -747,7 +905,7 @@ const Music = (() => {
 
     let prevF = 0, lastLvl = 0;
     notes.forEach(([m, b], i) => {
-      const ti = times[i], dur = b * BEAT;
+      const ti = times[i], dur = b * bd;
       const f = mtof(m) * Math.pow(2, (Math.random() - 0.5) * 0.004);
       // Phrase shape: swell toward the middle, taper at the end.
       const lvl = 0.16 * (0.82 + 0.22 * Math.sin(Math.PI * (i + 0.5) / n)) * (i === n - 1 ? 0.9 : 1);
@@ -799,7 +957,7 @@ const Music = (() => {
   }
 
   // ---- the composition: a ten-minute suite for solo flute, built from the original themes ----
-  let SONG = null, pos = 0, nextT = 0;
+  let SONG = null, pos = 0, nextT = 0, suite = 'classic';
 
   // ---- harp: plucked strings made with the Karplus-Strong method ----
   // A burst of soft noise circulates through a short delay that loses a little
@@ -840,7 +998,7 @@ const Music = (() => {
   }
   // One bar of harp. Flowing: bass on the downbeat, then the chord rising in eighth notes.
   // Sparse: a slow rolled chord on the downbeat only.
-  function harpBar(out, t, chordName, level, sparse){
+  function harpBar(out, t, chordName, level, sparse, bd = BEAT, meter = 3){
     const c = CHORDS[chordName], r = c.root;
     const third = c.pcs[1] - c.pcs[0], fifth = 7;
     const th = ((third % 12) + 12) % 12;
@@ -848,10 +1006,29 @@ const Music = (() => {
       [r, r + fifth, r + 12, r + 12 + th].forEach((m, i) => pluck(out, t + i * 0.09, m, level * (i ? 0.7 : 1)));
       return;
     }
-    const e = BEAT / 2;
-    const pat = [r, r + fifth, r + 12, r + 12 + th, r + 12 + fifth, r + 12 + th];
-    const acc = [1, 0.55, 0.7, 0.55, 0.62, 0.5];
-    pat.forEach((m, i) => pluck(out, t + i * e, m, level * acc[i]));
+    const e = bd / 2;
+    const pat = [r, r + fifth, r + 12, r + 12 + th, r + 12 + fifth, r + 12 + th, r + 12, r + fifth];
+    const acc = [1, 0.55, 0.7, 0.55, 0.62, 0.5, 0.66, 0.5];
+    for (let i = 0; i < meter * 2; i++) pluck(out, t + i * e, pat[i], level * acc[i]);
+  }
+  // Sleigh bells: a cluster of tiny bright metal jingles.
+  function jingle(out, t, vel){
+    [2600, 3300, 4200, 5200, 6500, 7900].forEach(f => {
+      const o = ctx.createOscillator(); o.type = 'triangle';
+      o.frequency.value = f * (0.96 + Math.random() * 0.08);
+      const g = ctx.createGain(), d = 0.08 + Math.random() * 0.14;
+      const tt = t + Math.random() * 0.025;
+      g.gain.setValueAtTime(0.0001, tt);
+      g.gain.exponentialRampToValueAtTime(0.018 * vel, tt + 0.003);
+      g.gain.exponentialRampToValueAtTime(0.0001, tt + d);
+      o.connect(g); g.connect(out); o.start(tt); o.stop(tt + d + 0.02);
+    });
+    const n = ctx.createBufferSource(); n.buffer = noise;
+    const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 6000;
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.05 * vel, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    n.connect(hp); hp.connect(g); g.connect(out); n.start(t, Math.random() * 0.5); n.stop(t + 0.08);
   }
 
   function loop(){
@@ -859,20 +1036,32 @@ const Music = (() => {
     // Schedule only a few seconds ahead, so a phone never holds ten minutes of notes in memory.
     while (nextT < ctx.currentTime + 6){
       const item = SONG[pos];
+      const bd = 60 / (item.bpm || 66), meter = item.meter || 3;
       const start = nextT;
       let beats = item.rest;
       if (item.notes){
         beats = 0;
-        whistlePhrase(session, nextT, item.notes.map(([m, b]) => [m + 12, b]));
-        item.notes.forEach(([m, b]) => { nextT += b * BEAT; beats += b; });
-      } else nextT += beats * BEAT;
+        // Rests (midi 0) split the tune into separate breaths.
+        let group = [], gStart = nextT;
+        const flush = () => { if (group.length) whistlePhrase(session, gStart, group.map(([m, b]) => [m + 12, b]), bd); group = []; };
+        item.notes.forEach(([m, b]) => {
+          if (m === 0){ flush(); nextT += b * bd; gStart = nextT; }
+          else { if (!group.length) gStart = nextT; group.push([m, b]); nextT += b * bd; }
+          beats += b;
+        });
+        flush();
+      } else nextT += beats * bd;
       // Harp underneath, following chords drawn from the melody.
       if (item.harp > 0){
-        const chords = item.notes ? (item.chords || (item.chords = chordsFor(item.notes))) : null;
-        for (let bar = 0; bar < beats / 3; bar++){
+        const chords = item.notes ? (item.chords || (item.chords = chordsFor(item.notes, meter))) : null;
+        for (let bar = 0; bar < beats / meter; bar++){
           const ch = chords ? chords[bar] : 'G';
-          harpBar(session, start + bar * 3 * BEAT, ch, item.harp, item.sparse || !chords);
+          harpBar(session, start + bar * meter * bd, ch, item.harp, item.sparse || !chords, bd, meter);
         }
+      }
+      // Sleigh bells on the lively tunes: a shake on every beat, lighter between.
+      if (item.bells){
+        for (let k = 0; k < beats * 2; k++) jingle(session, start + k * bd / 2, k % 2 ? 0.45 : (k % (meter * 2) === 0 ? 1 : 0.75));
       }
       pos = (pos + 1) % SONG.length;
     }
@@ -889,7 +1078,7 @@ const Music = (() => {
       session.gain.setValueAtTime(0, ctx.currentTime);
       session.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
       session.connect(master);
-      if (!SONG) SONG = composeSuite();
+      if (!SONG) SONG = suite === 'holiday' ? composeHoliday() : composeSuite();
       pos = 0; nextT = ctx.currentTime + 0.4;
       loop();
     },
@@ -904,6 +1093,12 @@ const Music = (() => {
       setTimeout(() => s.disconnect(), 1000);
     },
     get playing(){ return playing; },
+    // Switch between the classic suite and the holiday medley, fading across if playing.
+    setSuite(name){
+      if (name === suite) return;
+      suite = name; SONG = null;
+      if (playing){ this.stop(); setTimeout(() => { if (!playing) this.start(); }, 900); }
+    },
     // Shared audio for sound effects, created on the first tap.
     audio(){
       if (!ctx && !init()) return null;
@@ -945,6 +1140,13 @@ const Sfx = (() => {
     tone(a, t, f * 2.0, 'sine', gain * 0.3, 0.7);
     tone(a, t, f * 3.01, 'sine', gain * 0.12, 0.35);
   };
+  // A shake of sleigh bells: several jingles in quick succession, fading.
+  function shake(a, t, count){
+    for (let k = 0; k < count; k++){
+      const tt = t + k * 0.055 + Math.random() * 0.015, v = 1 - k / (count + 2);
+      [2600, 3300, 4200, 5200, 6500, 7900].forEach(f => tone(a, tt + Math.random() * 0.02, f * (0.96 + Math.random() * 0.08), 'triangle', 0.012 * v, 0.1 + Math.random() * 0.12));
+    }
+  }
   return {
     set on(v){ on = v; },
     get on(){ return on; },
@@ -959,15 +1161,21 @@ const Sfx = (() => {
       tone(a, t, f * 5.4, 'sine', 0.012, 0.08);
       puff(a, t, 5000, 1, 0.02, 0.01);
     },
-    // Tube finished: the cork goes in with a soft pop.
+    // Tube finished: the cork goes in with a soft pop (holiday: a little bell and a jingle).
     cork(){
       const a = A(); if (!a) return;
+      if (document.body.classList.contains('holiday')){
+        const t = a.ctx.currentTime + 0.1;
+        bell(a, t, 88, 0.05); shake(a, t, 3);
+        return;
+      }
       const t = a.ctx.currentTime + 0.12;
       puff(a, t, 900, 1.2, 0.12, 0.05);
       tone(a, t, 520, 'sine', 0.1, 0.12, 190);
     },
-    // Level solved: a rising bell arpeggio.
+    // Level solved: a rising bell arpeggio (holiday: sleigh bells ring it in).
     win(){ const a = A(); if (!a) return; const t = a.ctx.currentTime + 0.1;
+      if (document.body.classList.contains('holiday')) shake(a, t, 12);
       [79, 83, 86, 91].forEach((m, i) => bell(a, t + i * 0.12, m, 0.06)); },
     // Bad move: a low, soft bonk.
     bad(){ const a = A(); if (!a) return; const t = a.ctx.currentTime;
@@ -1101,8 +1309,8 @@ function doMove(from, to){
 // Fly a copy of the ball along a smooth arc from one tube to another.
 function fly(o, a, d, peak, delay, b){
   const c = document.createElement('div');
-  c.className = 'ball fly';
-  c.style.cssText = `--c:${COLORS[o.c][0]};left:${a.left}px;top:${a.top}px;width:${b}px;height:${b}px;font-size:${b * 0.42}px`;
+  c.className = `ball fly c${o.c}`;
+  c.style.cssText = `--c:${COLORS[o.c][0]};--b:${b}px;left:${a.left}px;top:${a.top}px;width:${a.width}px;height:${a.height}px;font-size:${b * 0.42}px`;
   c.innerHTML = `<span class="sym">${COLORS[o.c][1]}</span>`;
   document.body.appendChild(c);
   const dx = d.left - a.left, dy = d.top - a.top, py = peak - a.top;
@@ -1243,6 +1451,16 @@ function showHint(){
   updateControls();
 }
 
+const BOW = `<div class="bow"><svg viewBox="0 0 100 66" aria-hidden="true">
+  <path d="M50 30 C 30 4, 4 8, 9 28 C 13 44, 36 41, 50 32 Z" fill="url(#bowGold)"/>
+  <path d="M50 30 C 70 4, 96 8, 91 28 C 87 44, 64 41, 50 32 Z" fill="url(#bowGold)"/>
+  <path d="M48 30 C 34 14, 16 15, 18 27 C 21 36, 36 34, 48 31 Z" fill="#6f5210" opacity=".35"/>
+  <path d="M52 30 C 66 14, 84 15, 82 27 C 79 36, 64 34, 52 31 Z" fill="#6f5210" opacity=".35"/>
+  <path d="M47 34 L 31 63 L 39 60 L 43 65 L 50 36 Z" fill="url(#bowGold)"/>
+  <path d="M53 34 L 69 63 L 61 60 L 57 65 L 50 36 Z" fill="url(#bowGold)"/>
+  <ellipse cx="50" cy="32" rx="8" ry="7" fill="#e6bd55" stroke="#8e6a1c" stroke-width="1.5"/>
+</svg></div>`;
+
 function render(opts = {}){
   const n = S.tubes.length, cap = S.cap;
   const rows = n <= 6 ? 1 : 2;
@@ -1269,7 +1487,7 @@ function render(opts = {}){
       html += `<button class="slot" data-i="${i}" aria-label="Tube ${i + 1}, ${t.length} of ${cap} filled${done ? ', complete' : ''}"><div class="tube${done ? ' done' : ''}">`;
       t.forEach((o, k) => {
         const hid = !S.revealed.has(o.id);
-        let cls = hid ? ' hidden' : '', style = `--c:${hid ? 'var(--hid)' : COLORS[o.c][0]}`;
+        let cls = (hid ? ' hidden' : ` c${o.c}`), style = `--c:${hid ? 'var(--hid)' : COLORS[o.c][0]}`;
         if (k === t.length - 1){
           style += `;--up:${-((cap - t.length) * b + b * 0.9 + 3)}px`;
           if (S.selected === i) cls += ' lift';
@@ -1278,7 +1496,7 @@ function render(opts = {}){
         if (reveal.has(o.id)) cls += ' reveal';
         html += `<div class="ball${cls}" style="${style}"><span class="sym">${COLORS[o.c][1]}</span><span class="q">?</span></div>`;
       });
-      if (done) html += '<div class="cork"></div>';
+      if (done) html += document.body.classList.contains('holiday') ? BOW : '<div class="cork"></div>';
       html += '</div></button>';
     }
     html += '</div>';
@@ -1358,6 +1576,65 @@ function setVibe(on, quiet){
   if (players.cur){ players.cur.vibe = on; players.save(); }
   if (on && !quiet) buzz(40);
 }
+// ---- holiday theme: on in December unless a player has chosen otherwise ----
+const Snow = (() => {
+  const cv = el('snow'), cx = cv.getContext('2d');
+  let flakes = [], raf = 0, last = 0, running = false;
+  function size(){
+    const dpr = Math.min(2, window.devicePixelRatio || 1);
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr;
+    cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const n = Math.round(Math.min(110, innerWidth * innerHeight / 9000));
+    while (flakes.length < n) flakes.push(newFlake(true));
+    if (flakes.length > n) flakes.length = n;
+  }
+  function newFlake(anywhere){
+    const r = 0.8 + Math.random() * 2.4;
+    return { x: Math.random() * innerWidth, y: anywhere ? Math.random() * innerHeight * 0.85 : -6, r,
+             v: 10 + r * 9 + Math.random() * 8, sway: Math.random() * 6.28, sw: 0.4 + Math.random() * 0.8,
+             a: 0.35 + Math.random() * 0.5 };
+  }
+  function frame(t){
+    if (!running) return;
+    const dt = Math.min(0.05, (t - (last || t)) / 1000); last = t;
+    cx.clearRect(0, 0, innerWidth, innerHeight);
+    const nav = document.querySelector('nav');
+    const floor = nav ? nav.getBoundingClientRect().top : innerHeight;
+    cx.save(); cx.beginPath(); cx.rect(0, 0, innerWidth, floor); cx.clip();
+    for (const f of flakes){
+      f.y += f.v * dt; f.sway += f.sw * dt; f.x += Math.sin(f.sway) * 12 * dt;
+      if (f.y > floor + 6){ Object.assign(f, newFlake(false)); }
+      cx.globalAlpha = f.a; cx.beginPath(); cx.arc(f.x, f.y, f.r, 0, 6.2832); cx.fillStyle = '#fff'; cx.fill();
+    }
+    cx.restore();
+    raf = requestAnimationFrame(frame);
+  }
+  const ok = () => !reduceMotion.matches && !document.hidden;
+  return {
+    start(){ if (running || !ok()) return; running = true; size(); last = 0; raf = requestAnimationFrame(frame); },
+    stop(){ running = false; cancelAnimationFrame(raf); cx.clearRect(0, 0, cv.width, cv.height); },
+    resize(){ if (running) size(); }
+  };
+})();
+window.addEventListener('resize', () => Snow.resize());
+document.addEventListener('visibilitychange', () => {
+  if (!document.body.classList.contains('holiday')) return;
+  document.hidden ? Snow.stop() : Snow.start();
+});
+const holidayDefault = () => new Date().getMonth() === 11;
+function applyTheme(holiday){
+  document.body.classList.toggle('holiday', holiday);
+  el('optHoliday').checked = holiday;
+  holiday ? Snow.start() : Snow.stop();
+  Music.setSuite(holiday ? 'holiday' : 'classic');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = holiday ? '#0d1828' : '#2f6f8f';
+  if (S) render();
+}
+el('optHoliday').onchange = e => {
+  if (players.cur){ players.cur.holiday = e.target.checked; players.save(); }
+  applyTheme(e.target.checked);
+};
 el('optMusic').onchange = e => setMusic(e.target.checked);
 el('optSounds').onchange = e => setSounds(e.target.checked);
 el('optVibe').onchange = e => setVibe(e.target.checked);
@@ -1444,6 +1721,7 @@ function play(name){
   const p = players.use(name, music, sounds);
   if (modal === 'start') closeModal(); else el('start').hidden = true;
   setSymbols(!!p.symbols);
+  applyTheme(p.holiday === undefined ? holidayDefault() : p.holiday);
   setMusic(music);
   setSounds(sounds, true);
   setVibe(p.vibe !== false, true);
