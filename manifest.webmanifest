@@ -1,7 +1,7 @@
 {
   "name": "Tube Sort",
   "short_name": "Tube Sort",
-  "description": "A calm ball-sorting puzzle with 100 levels.",
+  "description": "A calm ball-sorting puzzle with 300 levels.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

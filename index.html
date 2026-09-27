@@ -49,6 +49,7 @@ header{
 }
 h1{font-size:1.6rem;font-weight:600;margin:0}
 .stats{display:flex;gap:14px;align-items:baseline;color:var(--muted);font-size:1rem;flex-wrap:wrap}
+@media (max-width: 400px){ header h1{font-size:1.35rem} .stats{font-size:.9rem;gap:10px} #who{max-width:7em} }
 #who{font:inherit;font-size:.95rem;color:var(--accent);background:none;border:0;padding:4px 2px;cursor:pointer;
   max-width:9em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-height:32px}
 #who:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
@@ -379,7 +380,7 @@ const COLORS = [
   ['#2A9D8F','★'],['#4CC9F0','✚'],['#3A5BD9','♥'],['#7B2CBF','✖'],
   ['#FF70A6','⬢'],['#8D5A3B','☾'],['#9AA5B1','♣'],['#F5F5F0','♠']
 ];
-const MAX_LEVEL = 100;
+const MAX_LEVEL = 300;
 
 function rng(seed){
   return function(){
@@ -390,15 +391,22 @@ function rng(seed){
   };
 }
 
-// Difficulty curve for 100 levels.
-//  1-45:  4-ball tubes, one new color every 4 levels (3 colors up to 12 by level 37).
-//  46-100: 5-ball tubes, restart at 9 colors and climb back to 12 by level 61.
-//  51+:   hidden balls, from about 20% of buried balls up to all of them by level 90.
-//  81+:   no extra tube.
-//  All levels: later levels pick the most scrambled of several solvable shuffles.
-//  101+:  bonus levels at maximum difficulty.
+// Difficulty curve for 300 levels.
+//  1-45:    4-ball tubes, one new color every 4 levels (3 colors up to 12 by level 37).
+//  46-100:  5-ball tubes, restart at 9 colors and climb back to 12 by level 61.
+//  51+:     hidden balls, from about 20% of buried balls up to all of them by level 90.
+//  81+:     no extra tube.
+//  101-150: 6-ball tubes, restart at 9 colors and climb back to 12 by level 125.
+//  151-200: 6-ball tubes, 12 colors, tougher shuffles.
+//  201-250: 7-ball tubes, restart at 10 colors and climb back to 12 by level 225.
+//  251-300: 7-ball tubes, 12 colors, the toughest shuffles.
+//  Levels 1-100 pick the most scrambled of several shuffles; from 101 on, the
+//  game picks the shuffle that takes its solver the most work to untangle,
+//  choosing from more candidates as levels rise.
+//  301+:    bonus levels at maximum difficulty.
+// Levels 1-100 are generated exactly as before, so nobody's saved levels change.
 function params(level){
-  const l = Math.min(level, MAX_LEVEL);
+  const l = Math.min(level, 100);
   let colors, cap;
   if (l <= 45){ cap = 4; colors = Math.min(12, 3 + Math.floor((l - 1) / 4)); }
   else { cap = 5; colors = Math.min(12, 9 + Math.floor((l - 46) / 5)); }
@@ -500,15 +508,53 @@ function solvePath(start, cap, limit = 60000){
     }
     return false;
   }
-  if (dfs(start.map(t => t.slice()))) return { status: 'solved', path: path.slice() };
-  return { status: capped ? 'unknown' : 'none' };
+  if (dfs(start.map(t => t.slice()))) return { status: 'solved', path: path.slice(), nodes };
+  return { status: capped ? 'unknown' : 'none', nodes };
 }
 
 // Fewer same-color neighbors means a more thorough scramble.
 const clumps = tubes => tubes.reduce((n, t) => { for (let k = 1; k < t.length; k++) if (t[k] === t[k - 1]) n++; return n; }, 0);
 
 // Levels are seeded by number, so every friend gets the same Level 12.
+function params2(level){
+  const l = Math.min(level, MAX_LEVEL);
+  let cap, colors, k;
+  if (l <= 150){ cap = 6; colors = Math.min(12, 9 + Math.floor((l - 101) / 8)); k = 1 + Math.floor((l - 101) / 16); }
+  else if (l <= 200){ cap = 6; colors = 12; k = 3 + Math.floor((l - 151) / 25); }
+  else if (l <= 250){ cap = 7; colors = Math.min(12, 10 + Math.floor((l - 201) / 12)); k = 2 + Math.floor((l - 201) / 20); }
+  else { cap = 7; colors = 12; k = 4 + Math.floor((l - 251) / 20); }
+  return { cap, colors, k, empty: 2 };
+}
+function genLevel2(level){
+  const p = params2(level);
+  const r = rng(level * 7919 + 13);
+  let best = null, bestEffort = -1, found = 0;
+  for (let attempt = 0; attempt < 200 && (found < p.k || !best); attempt++){
+    const balls = [];
+    for (let c = 0; c < p.colors; c++) for (let i = 0; i < p.cap; i++) balls.push(c);
+    for (let i = balls.length - 1; i > 0; i--){
+      const j = Math.floor(r() * (i + 1));
+      [balls[i], balls[j]] = [balls[j], balls[i]];
+    }
+    const tubes = [];
+    for (let t = 0; t < p.colors; t++) tubes.push(balls.slice(t * p.cap, (t + 1) * p.cap));
+    if (tubes.some(uniform)) continue;
+    for (let e = 0; e < p.empty; e++) tubes.push([]);
+    const res = solvePath(tubes, p.cap, attempt < 60 ? 8000 : 40000);
+    if (res.status === 'solved'){ found++; if (res.nodes > bestEffort){ best = tubes; bestEffort = res.nodes; } }
+  }
+  // Every buried ball starts hidden from level 101 on.
+  let id = 0;
+  const hidden = [];
+  const tubes = best.map(t => t.map((c, k) => {
+    const o = { c, id: id++ };
+    if (k < t.length - 1) hidden.push(o.id);
+    return o;
+  }));
+  return { tubes, cap: p.cap, hidden, extra: false };
+}
 function genLevel(level){
+  if (level > 100) return genLevel2(level);
   const p = params(level);
   const r = rng(level * 7919 + 13);
   let best = null, bestScore = Infinity, found = 0;
@@ -765,8 +811,9 @@ function composeHoliday(){
       ? [[m, d - 0.5], [SC[Math.min(SC.length - 1, near(m) + 1)], 0.25], [m, 0.25]]
       : [[m, d]]);
   const cat = (...parts) => parts.flat();
-  const item = (o, notes) => ({ notes, rest: 0, harp: o.harp, sparse: !!o.sparse, bpm: o.bpm, meter: o.meter, bells: !!o.bells });
-  const rest = (o, beats) => ({ notes: null, rest: beats, harp: 0, bpm: o.bpm, meter: o.meter });
+  const SLOW = 0.8;   // the whole medley plays at 80% of these tempos
+  const item = (o, notes) => ({ notes, rest: 0, harp: o.harp, sparse: !!o.sparse, bpm: o.bpm * SLOW, meter: o.meter, bells: !!o.bells });
+  const rest = (o, beats) => ({ notes: null, rest: beats, harp: 0, bpm: o.bpm * SLOW, meter: o.meter });
   const T = {
     bells:   { bpm: 138, meter: 3, harp: 0.4 },
     jingle:  { bpm: 116, meter: 4, harp: 0.45, bells: true },
@@ -1076,7 +1123,7 @@ const Music = (() => {
       playing = true;
       session = ctx.createGain();
       session.gain.setValueAtTime(0, ctx.currentTime);
-      session.gain.linearRampToValueAtTime(1, ctx.currentTime + 2);
+      session.gain.linearRampToValueAtTime(suite === 'holiday' ? 0.6 : 1, ctx.currentTime + 2);   // holiday medley 40% quieter
       session.connect(master);
       if (!SONG) SONG = suite === 'holiday' ? composeHoliday() : composeSuite();
       pos = 0; nextT = ctx.currentTime + 0.4;
@@ -1193,11 +1240,24 @@ const MILESTONES = {
   46: 'Taller tubes from here: 5 balls each.',
   51: 'New: hidden balls. Each one shows its color when it reaches the top of a tube.',
   81: 'From here on, no extra tube. You get what you see.',
-  101: 'You finished all 100. These bonus levels stay at maximum difficulty.'
+  101: 'Taller tubes again: 6 balls each, and every buried ball starts hidden.',
+  151: 'Tougher shuffles from here on.',
+  201: 'The tallest tubes yet: 7 balls each.',
+  251: 'Master levels: the trickiest shuffles in the game.',
+  301: 'You finished all 300. These bonus levels stay at maximum difficulty.'
 };
 
+// Higher levels take a moment to build, so each is built once and kept,
+// and the next level is prepared in the background while the win card shows.
+const levelCache = new Map();
+function getLevel(level){
+  if (!levelCache.has(level)) levelCache.set(level, genLevel(level));
+  const g = levelCache.get(level);
+  return { tubes: g.tubes.map(t => t.map(o => ({ ...o }))), cap: g.cap, hidden: g.hidden.slice(), extra: g.extra };
+}
+function prepareLevel(level){ setTimeout(() => { try { getLevel(level); } catch(e){} }, 600); }
 function startLevel(level, isRestart){
-  const g = genLevel(level);
+  const g = getLevel(level);
   const all = new Set(g.tubes.flat().map(o => o.id));
   g.hidden.forEach(i => all.delete(i));
   S = { level, tubes: g.tubes, cap: g.cap, revealed: all, history: [], moves: 0,
@@ -1344,12 +1404,13 @@ function afterMove(to){
   updateControls();
   const prevBest = progress.best(S.level);
   progress.solved(S.level, S.moves, S.hintsUsed > 0);
+  prepareLevel(S.level + 1);
   players.cur.level = S.level + 1; players.save();
   setTimeout(() => {
     const moves = `${S.moves} ${S.moves === 1 ? 'move' : 'moves'}`;
     if (S.level === MAX_LEVEL){
-      el('winTitle').textContent = 'All 100 levels solved';
-      el('winText').textContent = `Level 100 in ${moves}. Bonus levels are next if you want more.`;
+      el('winTitle').textContent = `All ${MAX_LEVEL} levels solved`;
+      el('winText').textContent = `Level ${MAX_LEVEL} in ${moves}. Bonus levels are next if you want more.`;
       el('next').textContent = 'Keep playing';
     } else {
       el('winTitle').textContent = `Level ${S.level} solved`;
@@ -1394,9 +1455,10 @@ function checkStuck(){
     let msg = null;
     if (!anyMove) msg = 'No moves left. Undo a move or restart.';
     else {
-      const r = solvePath(state, S.cap, 40000);
+      const lim = S.cap >= 6 ? 12000 : 40000;
+      const r = solvePath(state, S.cap, lim);
       if (r.status === 'none'){
-        const withExtra = S.extraAllowed && !S.extraUsed && solvePath(state.concat([[]]), S.cap, 40000).status === 'solved';
+        const withExtra = S.extraAllowed && !S.extraUsed && solvePath(state.concat([[]]), S.cap, lim).status === 'solved';
         msg = withExtra ? "You'll need the extra tube from here. Tap Add tube."
                         : "This can't be finished from here. Undo a few moves or restart.";
       }
@@ -1518,7 +1580,8 @@ function updateControls(){
   el('levels').disabled = S.busy > 0;
   el('settings').disabled = S.busy > 0;
   const x = el('extra');
-  x.textContent = S.extraAllowed ? 'Add tube' : 'No extra tube';
+  x.textContent = 'Add tube';
+  x.title = S.extraAllowed ? '' : 'No extra tube on this level';
   x.disabled = !S.extraAllowed || S.extraUsed || S.solved || S.busy > 0;
 }
 
@@ -1669,7 +1732,8 @@ function openPicker(){
   if (S.busy) return;
   const top = progress.top;
   const last = Math.max(MAX_LEVEL, top);
-  const sections = { 1: '4-ball tubes', 46: '5-ball tubes', 51: 'Hidden balls', 81: 'No extra tube', 101: 'Bonus levels' };
+  const sections = { 1: '4-ball tubes', 46: '5-ball tubes', 51: 'Hidden balls', 81: 'No extra tube', 101: '6-ball tubes',
+                     151: 'Tougher shuffles', 201: '7-ball tubes', 251: 'Master levels', 301: 'Bonus levels' };
   let html = '';
   for (let l = 1; l <= last; l++){
     if (sections[l]) html += `<div class="sec">${sections[l]}</div>`;
