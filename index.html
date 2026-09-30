@@ -872,6 +872,45 @@ function chordsFor(notes, meter = 3){
 }
 // ---- end composition ----
 
+// ---- iPhone audio: play the game's sound as media, so silent mode doesn't mute it ----
+// iPhones treat web game sound like a ringtone unless told otherwise. Newer iPhones
+// have a setting for this; older ones switch to media sound while a (silent) audio
+// clip is playing. Either way the game plays in silent mode and pauses other audio,
+// such as a podcast, while music or sound effects are on.
+const AudioMode = (() => {
+  const ios = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const session = navigator.audioSession;
+  let want = false, keeper = null;
+  function silentClip(){
+    if (keeper) return keeper;
+    const rate = 8000, n = 4000;                      // half a second of silence, 8-bit mono WAV
+    const buf = new ArrayBuffer(44 + n), v = new DataView(buf);
+    const txt = (o, t) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)); };
+    txt(0, 'RIFF'); v.setUint32(4, 36 + n, true); txt(8, 'WAVE'); txt(12, 'fmt ');
+    v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+    v.setUint32(24, rate, true); v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true);
+    txt(36, 'data'); v.setUint32(40, n, true);
+    for (let i = 0; i < n; i++) v.setUint8(44 + i, 128);
+    keeper = new Audio(URL.createObjectURL(new Blob([buf], { type: 'audio/wav' })));
+    keeper.loop = true;
+    keeper.setAttribute('playsinline', '');
+    return keeper;
+  }
+  document.addEventListener('visibilitychange', () => { if (document.hidden && keeper) keeper.pause(); });
+  return {
+    // true while music or sound effects are switched on
+    set(on){
+      want = on;
+      if (session){ try { session.type = on ? 'playback' : 'auto'; } catch(e){} return; }
+      if (!ios) return;
+      if (on && !document.hidden){ const k = silentClip(); if (k.paused) k.play().catch(() => {}); }
+      else if (keeper) keeper.pause();
+    },
+    // After a phone call, Siri or another app, the silent clip needs a tap to restart.
+    wake(){ if (want && !session && ios) this.set(true); }
+  };
+})();
+
 // ---- music: an original, mellow tune for a solo wooden flute, synthesized live ----
 const Music = (() => {
   let ctx = null, master = null, session = null, timer = null, noise = null;
@@ -1149,14 +1188,19 @@ const Music = (() => {
     // Shared audio for sound effects, created on the first tap.
     audio(){
       if (!ctx && !init()) return null;
-      if (ctx.state === 'suspended' && !document.hidden){ try { ctx.resume(); } catch(e){} }
+      if (ctx.state !== 'running' && !document.hidden){ try { ctx.resume(); } catch(e){} }
       return { ctx, master, noise };
     },
+    // iPhones put sound on hold after a phone call, Siri or switching apps, and
+    // often refuse to restart it until the player taps. Called on every tap.
+    wake(){ if (ctx && ctx.state !== 'running' && !document.hidden){ try { ctx.resume(); } catch(e){} } },
     pause(){ if (ctx && ctx.state === 'running') ctx.suspend(); },
     resume(){ if (ctx) ctx.resume(); }
   };
 })();
 document.addEventListener('visibilitychange', () => document.hidden ? Music.pause() : Music.resume());
+['touchend', 'pointerup', 'click'].forEach(type =>
+  document.addEventListener(type, () => { AudioMode.wake(); Music.wake(); }, { capture: true, passive: true }));
 
 // ---- sound effects: glass clinks, a cork pop, a small chime ----
 const Sfx = (() => {
@@ -1623,12 +1667,14 @@ function setSymbols(on){
   if (players.cur){ players.cur.symbols = on; players.save(); }
 }
 function setMusic(on){
+  AudioMode.set(on || Sfx.on);
   on ? Music.start() : Music.stop();
   el('optMusic').checked = on;
   if (players.cur){ players.cur.music = on; if (shared(players.cur)) players.data.music = on; players.save(); }
 }
 function setSounds(on, quiet){
   Sfx.on = on;
+  AudioMode.set(on || Music.playing);
   el('optSounds').checked = on;
   if (players.cur){ players.cur.sounds = on; if (shared(players.cur)) players.data.sounds = on; players.save(); }
   if (on && !quiet) Sfx.lift();
